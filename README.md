@@ -1,2 +1,1 @@
-# stm32cube
-STM32Cube
+STM32 cube libraries.
