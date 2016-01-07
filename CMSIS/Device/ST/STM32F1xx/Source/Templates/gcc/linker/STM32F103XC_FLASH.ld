@@ -4,7 +4,7 @@
 **  File        : STM32F103XC_FLASH.ld
 **
 **  Abstract    : Linker script for STM32F103xC Device with
-**                256Byte FLASH, 48KByte RAM
+**                256KByte FLASH, 48KByte RAM
 **
 **                Set heap size, stack size and stack location according
 **                to application requirements.
