@@ -101,7 +101,7 @@ ifneq ($(CUBE_USBD),)
 	CFLAGS += -I $(USBD_BASE)/Core/Inc
 	CFLAGS += -I $(USBD_BASE)/Class/$(CUBE_USBD)/Inc
 	USBD_CLASS_SRC_DIR = $(USBD_BASE)/Class/$(CUBE_USBD)/Src
-	CUBE_USBD_SOURCES := usbd_core.c $(CUBE_USBD_SRCS_$(CUBE_USBD))
+	CUBE_USBD_SOURCES := usbd_core.c usbd_ctlreq.c usbd_ioreq.c $(CUBE_USBD_SRCS_$(CUBE_USBD))
 endif
 
 vpath %.c src $(USBD_CORE_SRC_DIR) $(USBD_CLASS_SRC_DIR)
