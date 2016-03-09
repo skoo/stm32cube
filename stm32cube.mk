@@ -31,6 +31,9 @@ LDSCRIPT_INC=$(CMSIS_DEVICE_BASE)/Source/Templates/gcc/linker
 
 CUBE_LIB=stm32$(CUBE_SERIES)_$(CUBE_OPTIMIZATION_LEVEL)
 
+USBD_BASE=$(BASEDIR)/Middlewares/ST/STM32_USB_Device_Library
+USBD_CORE_SRC_DIR=$(BASEDIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src
+
 OPENOCD_PROC_FILE=$(BASEDIR)/openocd/stm32-openocd.cfg
 OPENOCD_DEVICE_FILE=$(BASEDIR)/openocd/stm32-device-openocd.cfg
 
@@ -83,12 +86,26 @@ endif
 
 ###################################################
 
-vpath %.c src
-
 CFLAGS += -mthumb -mlittle-endian
 
 CFLAGS += -I inc -I $(HAL_DRIVER_BASE)/Inc/
 CFLAGS += -I $(CMSIS_BASE)/Include -I $(CMSIS_DEVICE_BASE)/Include
+
+CUBE_USBD_SRCS_AUDIO = usbd_audio.c
+CUBE_USBD_SRCS_HID = usbd_hid.c
+CUBE_USBD_SRCS_CDC = usbd_cdc.c
+CUBE_USBD_SRCS_MSC = usbd_msc_bot.c usbd_msc.c usbd_msc_scsi.c usbd_msc_data.c usbd_dfu.c
+CUBE_USBD_SRCS_CustomHID = usbd_customhid.c
+
+ifneq ($(CUBE_USBD),)
+	CFLAGS += -I $(USBD_BASE)/Core/Inc
+	CFLAGS += -I $(USBD_BASE)/Class/$(CUBE_USBD)/Inc
+	USBD_CLASS_SRC_DIR = $(USBD_BASE)/Class/$(CUBE_USBD)/Src
+	CUBE_USBD_SOURCES := usbd_core.c $(CUBE_USBD_SRCS_$(CUBE_USBD))
+endif
+
+vpath %.c src $(USBD_CORE_SRC_DIR) $(USBD_CLASS_SRC_DIR)
+
 OBJS = $(SRCS:.c=.o)
 
 CUBE_STARTUP_SOURCES  = $(CMSIS_DEVICE_BASE)/Source/Templates/gcc/startup_$(CUBE_DEVICE_LOWER).s
@@ -110,7 +127,7 @@ lib$(CUBE_LIB).a: $(LIB_OBJS)
 
 proj: 	$(CUBE_PROJECT_NAME).hex $(CUBE_PROJECT_NAME).bin
 
-$(CUBE_PROJECT_NAME).elf: $(CUBE_STARTUP_SOURCES) $(CUBE_PROJECT_SOURCES)
+$(CUBE_PROJECT_NAME).elf: $(CUBE_STARTUP_SOURCES) $(CUBE_USBD_SOURCES) $(CUBE_PROJECT_SOURCES)
 	$(CC) $(CFLAGS) -T$(CUBE_LINKER_SCRIPT) -L ./ -L$(LDSCRIPT_INC) -L src $^ -l $(CUBE_LIB) -o $@
 	$(SIZE) $(CUBE_PROJECT_NAME).elf
 
