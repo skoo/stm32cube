@@ -104,12 +104,16 @@ ifneq ($(CUBE_USBD),)
 	CUBE_USBD_SOURCES := usbd_core.c usbd_ctlreq.c usbd_ioreq.c $(CUBE_USBD_SRCS_$(CUBE_USBD))
 endif
 
+CFLAGS += $(CUBE_EXTRA_CFLAGS)
+
 vpath %.c src $(USBD_CORE_SRC_DIR) $(USBD_CLASS_SRC_DIR)
 
 OBJS = $(SRCS:.c=.o)
 
 CUBE_STARTUP_SOURCES  = $(CMSIS_DEVICE_BASE)/Source/Templates/gcc/startup_$(CUBE_DEVICE_LOWER).s
 CUBE_STARTUP_SOURCES += $(CMSIS_DEVICE_BASE)/Source/Templates/system_stm32$(CUBE_SERIES)xx.c
+
+CUBE_HAL_CONF = -include stm32$(CUBE_SERIES)xx_hal_conf.h
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $^
@@ -128,7 +132,8 @@ lib$(CUBE_LIB).a: $(LIB_OBJS)
 proj: 	$(CUBE_PROJECT_NAME).hex $(CUBE_PROJECT_NAME).bin
 
 $(CUBE_PROJECT_NAME).elf: $(CUBE_STARTUP_SOURCES) $(CUBE_USBD_SOURCES) $(CUBE_PROJECT_SOURCES)
-	$(CC) $(CFLAGS) -T$(CUBE_LINKER_SCRIPT) -L ./ -L$(LDSCRIPT_INC) -L src $^ -l $(CUBE_LIB) -o $@
+	$(CC) $(CFLAGS) -T$(CUBE_LINKER_SCRIPT) -L ./ -L$(LDSCRIPT_INC) $(CUBE_HAL_CONF) \
+	  -L src $^ -l $(CUBE_LIB) -o $@
 	$(SIZE) $(CUBE_PROJECT_NAME).elf
 
 $(CUBE_PROJECT_NAME).lst: $(CUBE_PROJECT_NAME).elf
